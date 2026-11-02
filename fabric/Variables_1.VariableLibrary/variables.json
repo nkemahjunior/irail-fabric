@@ -1,0 +1,29 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/variableLibrary/definition/variables/1.0.0/schema.json",
+  "variables": [
+    {
+      "name": "irail_base_url",
+      "note": "",
+      "type": "String",
+      "value": "https://api.irail.be/v1"
+    },
+    {
+      "name": "user_agent",
+      "note": "",
+      "type": "String",
+      "value": "nkemahjr@gmail.com"
+    },
+    {
+      "name": "station_ids",
+      "note": "",
+      "type": "String",
+      "value": "BE.NMBS.008813003,BE.NMBS.008814001,BE.NMBS.008812005,BE.NMBS.008821006,BE.NMBS.008892007,BE.NMBS.008841004,BE.NMBS.008833001,BE.NMBS.008891009,BE.NMBS.008863008,BE.NMBS.008872009,BE.NMBS.008831005,BE.NMBS.008831765,BE.NMBS.008831112"
+    },
+    {
+      "name": "pause_seconds",
+      "note": "",
+      "type": "Number",
+      "value": 0.5
+    }
+  ]
+}
