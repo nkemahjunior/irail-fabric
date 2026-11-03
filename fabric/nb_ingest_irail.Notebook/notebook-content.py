@@ -111,6 +111,18 @@ except Exception:
     log.exception("Disturbances failed")
     failures.append("disturbances")
 
+
+stations_dir = RAW_ROOT / "stations" / f"date={run_ts:%Y-%m-%d}"
+if not any(stations_dir.glob("*.json")):
+    try:
+        data = fetch(session, "stations", {})
+        save_raw(data, "stations", "stations", run_ts)
+        log.info("Stations: %d", len(data.get("station", [])))
+    except Exception:
+        log.exception("Stations failed")
+        failures.append("stations")
+
+
 if failures:
     raise RuntimeError(f"{len(failures)} request(s) failed: {failures}")
 log.info("All %d requests succeeded", len(STATION_IDS) + 1)
