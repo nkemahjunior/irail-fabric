@@ -32,11 +32,7 @@ from pyspark.sql.types import StructType
 from delta.tables import DeltaTable
 
 bronze = notebookutils.lakehouse.getWithProperties("lh_bronze")
-BRONZE_LIVEBOARD = bronze["properties"]["abfsPath"] + "/Files/raw/liveboard"
-
-TARGET = "departures"
-CHECKPOINT = "Files/_checkpoints/departures"
-SCHEMA_FILE = Path("/lakehouse/default/Files/_schemas/liveboard.json")
+BRONZE_RAW = bronze["properties"]["abfsPath"] + "/Files/raw"
 
 # METADATA ********************
 
@@ -47,7 +43,60 @@ SCHEMA_FILE = Path("/lakehouse/default/Files/_schemas/liveboard.json")
 
 # CELL ********************
 
-from pyspark.sql import Window
+def keep_latest(df, key):
+    first_seen = df.groupBy(key).agg(F.min("observed_at").alias("first_seen_at"))
+    newest_first = Window.partitionBy(key).orderBy(F.col("observed_at").desc())
+    latest = (df.withColumn("rn", F.row_number().over(newest_first))
+                .filter(F.col("rn") == 1).drop("rn"))
+    return latest.join(first_seen, key).withColumnRenamed("observed_at", "last_seen_at")
+
+
+def merge_latest(batch, target, key):
+    if not spark.catalog.tableExists(target):
+        batch.write.format("delta").saveAsTable(target)
+        return
+    updates = {c: f"s.{c}" for c in batch.columns if c != "first_seen_at"}
+    updates["first_seen_at"] = "least(t.first_seen_at, s.first_seen_at)"
+    (DeltaTable.forName(spark, target).alias("t")
+        .merge(batch.alias("s"), f"t.{key} = s.{key}")
+        .whenMatchedUpdate(condition="s.last_seen_at >= t.last_seen_at", set=updates)
+        .whenNotMatchedInsertAll()
+        .execute())
+
+
+def schema_for(endpoint):
+    path = Path(f"/lakehouse/default/Files/_schemas/{endpoint}.json")
+    if path.exists():
+        return StructType.fromJson(json.loads(path.read_text()))
+    schema = spark.read.json(f"{BRONZE_RAW}/{endpoint}").schema
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(schema.json())
+    return schema
+
+
+def run_incremental(endpoint, flatten, target, key):
+    def process(new_files_df, batch_id):
+        merge_latest(keep_latest(flatten(new_files_df), key), target, key)
+
+    query = (spark.readStream
+                .schema(schema_for(endpoint))
+                .json(f"{BRONZE_RAW}/{endpoint}")
+                .withColumn("source_file", F.col("_metadata.file_path"))
+             .writeStream
+                .foreachBatch(process)
+                .option("checkpointLocation", f"Files/_checkpoints/{target}")
+                .trigger(availableNow=True)
+                .start())
+    query.awaitTermination()
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
+
+# CELL ********************
 
 def flatten_liveboard(raw):
     rows = raw.select(
@@ -79,43 +128,28 @@ def flatten_liveboard(raw):
     )
 
 
-
-
-def latest_per_departure(df):
-    first_seen = df.groupBy("departure_id").agg(F.min("observed_at").alias("first_seen_at"))
-    newest_first = Window.partitionBy("departure_id").orderBy(F.col("observed_at").desc())
-    latest = (df.withColumn("rn", F.row_number().over(newest_first))
-                .filter(F.col("rn") == 1)
-                .drop("rn"))
-    return (latest.join(first_seen, "departure_id")
-                  .withColumnRenamed("observed_at", "last_seen_at"))
-
-
-
-def merge_departures(batch):
-    if not spark.catalog.tableExists(TARGET):
-        batch.write.format("delta").saveAsTable(TARGET)
-        return
-    updates = {c: f"s.{c}" for c in batch.columns if c != "first_seen_at"}
-    updates["first_seen_at"] = "least(t.first_seen_at, s.first_seen_at)"
-    (DeltaTable.forName(spark, TARGET).alias("t")
-        .merge(batch.alias("s"), "t.departure_id = s.departure_id")
-        .whenMatchedUpdate(condition="s.last_seen_at >= t.last_seen_at", set=updates)
-        .whenNotMatchedInsertAll()
-        .execute())
-
-
-def process_micro_batch(new_files_df, batch_id):
-    merge_departures(latest_per_departure(flatten_liveboard(new_files_df)))
-
-
-def liveboard_schema():
-    if SCHEMA_FILE.exists():
-        return StructType.fromJson(json.loads(SCHEMA_FILE.read_text()))
-    schema = spark.read.json(BRONZE_LIVEBOARD).schema
-    SCHEMA_FILE.parent.mkdir(parents=True, exist_ok=True)
-    SCHEMA_FILE.write_text(schema.json())
-    return schema
+def flatten_disturbances(raw):
+    rows = raw.select(
+        F.timestamp_seconds(F.col("timestamp").cast("long")).alias("observed_at"),
+        F.col("source_file"),
+        F.explode("disturbance").alias("x"),
+    )
+    message_id = F.regexp_extract("x.link", r"messageID=(\d+)", 1)
+    cause = F.trim(F.regexp_extract("x.description", r"Cause:\s*([^\n]+)", 1))
+    return rows.select(
+        F.when(message_id != "", message_id)
+         .otherwise(F.sha2(F.concat_ws("|", "x.type", "x.title"), 256)).alias("disruption_id"),
+        F.col("x.type").alias("disruption_type"),
+        F.col("x.title").alias("title"),
+        F.trim(F.split("x.title", ":").getItem(0)).alias("affected_section"),
+        F.trim(F.regexp_extract("x.title", r":\s*(.+)$", 1)).alias("effect"),
+        F.when(cause != "", cause).alias("cause"),
+        F.col("x.description").alias("description"),
+        F.timestamp_seconds(F.col("x.timestamp").cast("long")).alias("published_at"),
+        F.col("x.link").alias("link"),
+        "observed_at",
+        "source_file",
+    )
 
 # METADATA ********************
 
@@ -126,17 +160,8 @@ def liveboard_schema():
 
 # CELL ********************
 
-query = (spark.readStream
-            .schema(liveboard_schema())
-            .json(BRONZE_LIVEBOARD)
-            .withColumn("source_file", F.col("_metadata.file_path"))
-         .writeStream
-            .foreachBatch(process_micro_batch)
-            .option("checkpointLocation", CHECKPOINT)
-            .trigger(availableNow=True)
-            .start())
-query.awaitTermination()
-print("processed batches:", query.recentProgress and len(query.recentProgress))
+run_incremental("liveboard", flatten_liveboard, "departures", "departure_id")
+run_incremental("disturbances", flatten_disturbances, "disruptions", "disruption_id")
 
 # METADATA ********************
 
@@ -147,8 +172,28 @@ print("processed batches:", query.recentProgress and len(query.recentProgress))
 
 # CELL ********************
 
-table = spark.table(TARGET)
-print("rows:", table.count(), "| unique departures:", table.select("departure_id").distinct().count())
+for table, key in [("departures", "departure_id"), ("disruptions", "disruption_id")]:
+    t = spark.table(table)
+    print(f"{table}: rows {t.count()} | unique {t.select(key).distinct().count()}")
+
+display(spark.table("disruptions")
+        .select("disruption_type", "affected_section", "effect", "cause", "first_seen_at", "last_seen_at")
+        .orderBy(F.desc("last_seen_at")).limit(10))
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
+
+# CELL ********************
+
+(spark.table("disruptions")
+    .groupBy("disruption_type")
+    .agg(F.count("*").alias("disruptions"),
+         F.count("cause").alias("with_cause"))
+    .show())
 
 # METADATA ********************
 
