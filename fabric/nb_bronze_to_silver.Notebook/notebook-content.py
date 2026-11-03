@@ -151,6 +151,23 @@ def flatten_disturbances(raw):
         "source_file",
     )
 
+
+def flatten_stations(raw):
+    rows = raw.select(
+        F.timestamp_seconds(F.col("timestamp").cast("long")).alias("observed_at"),
+        F.col("source_file"),
+        F.explode("station").alias("s"),
+    )
+    return rows.select(
+        F.col("s.id").alias("station_id"),
+        F.col("s.name").alias("station_name"),
+        F.col("s.standardname").alias("station_name_local"),
+        F.col("s.locationY").cast("double").alias("latitude"),
+        F.col("s.locationX").cast("double").alias("longitude"),
+        "observed_at",
+        "source_file",
+    )
+
 # METADATA ********************
 
 # META {
@@ -162,6 +179,7 @@ def flatten_disturbances(raw):
 
 run_incremental("liveboard", flatten_liveboard, "departures", "departure_id")
 run_incremental("disturbances", flatten_disturbances, "disruptions", "disruption_id")
+run_incremental("stations", flatten_stations, "stations", "station_id")
 
 # METADATA ********************
 
@@ -172,7 +190,7 @@ run_incremental("disturbances", flatten_disturbances, "disruptions", "disruption
 
 # CELL ********************
 
-for table, key in [("departures", "departure_id"), ("disruptions", "disruption_id")]:
+for table, key in [("departures", "departure_id"), ("disruptions", "disruption_id"), ("stations", "station_id")]:
     t = spark.table(table)
     print(f"{table}: rows {t.count()} | unique {t.select(key).distinct().count()}")
 
