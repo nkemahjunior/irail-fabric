@@ -209,3 +209,78 @@ print("unmapped categories:",
 # META   "language": "python",
 # META   "language_group": "synapse_pyspark"
 # META }
+
+# CELL ********************
+
+from delta.tables import DeltaTable
+
+SOURCE, TARGET = "lh_silver.departures", "fact_departure"
+
+if spark.catalog.tableExists(TARGET):
+    watermark = spark.table(TARGET).agg(F.max("last_seen_at")).first()[0]
+    changes = spark.table(SOURCE).filter(F.col("last_seen_at") >= watermark)
+else:
+    changes = spark.table(SOURCE)
+
+local_ts = F.from_utc_timestamp("scheduled_departure_utc", "Europe/Brussels")
+
+fact = changes.select(
+    "departure_id",
+    F.date_format(local_ts, "yyyyMMdd").cast("int").alias("date_key"),
+    (F.hour(local_ts) * 100 + F.minute(local_ts)).alias("time_key"),
+    "station_id",
+    "destination_station_id",
+    "train_category",
+    "train_line",
+    "train_name",
+    local_ts.alias("scheduled_departure_local"),
+    (local_ts + F.make_interval(secs=F.col("delay_seconds"))).alias("expected_departure_local"),
+    "delay_seconds",
+    F.round(F.col("delay_seconds") / 60, 1).alias("delay_minutes"),
+    ((F.col("delay_seconds") < 60) & ~F.col("is_cancelled")).alias("is_on_time"),
+    "is_cancelled",
+    "platform_changed",
+    "is_extra",
+    "occupancy",
+    "first_seen_at",
+    "last_seen_at",
+)
+
+if not spark.catalog.tableExists(TARGET):
+    fact.write.format("delta").saveAsTable(TARGET)
+else:
+    (DeltaTable.forName(spark, TARGET).alias("t")
+        .merge(fact.alias("s"), "t.departure_id = s.departure_id")
+        .whenMatchedUpdateAll(condition="s.last_seen_at >= t.last_seen_at")
+        .whenNotMatchedInsertAll()
+        .execute())
+
+print("processed rows:", changes.count())
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
+
+# CELL ********************
+
+fact_t = spark.table(TARGET)
+print("fact rows:", fact_t.count(), "| silver rows:", spark.table(SOURCE).count())
+
+checks = {
+    "date_key":       fact_t.join(spark.table("dim_date"), "date_key", "left_anti"),
+    "time_key":       fact_t.join(spark.table("dim_time"), "time_key", "left_anti"),
+    "station_id":     fact_t.join(spark.table("dim_station"), "station_id", "left_anti"),
+    "train_category": fact_t.join(spark.table("dim_train_type"), "train_category", "left_anti"),
+}
+for key, orphans in checks.items():
+    print(f"fact rows with unknown {key}: {orphans.count()}")
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
