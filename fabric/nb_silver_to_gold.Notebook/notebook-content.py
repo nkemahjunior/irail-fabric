@@ -106,3 +106,106 @@ display(spark.table("dim_time").filter("minute = 0"))
 # META   "language": "python",
 # META   "language_group": "synapse_pyspark"
 # META }
+
+# CELL ********************
+
+tracked = [
+    # station_id,          role,       province,          region
+    ("BE.NMBS.008813003", "Hub",      "Brussels-Capital", "Brussels"),
+    ("BE.NMBS.008814001", "Hub",      "Brussels-Capital", "Brussels"),
+    ("BE.NMBS.008812005", "Hub",      "Brussels-Capital", "Brussels"),
+    ("BE.NMBS.008821006", "Hub",      "Antwerp",          "Flanders"),
+    ("BE.NMBS.008892007", "Hub",      "East Flanders",    "Flanders"),
+    ("BE.NMBS.008841004", "Hub",      "Liège",            "Wallonia"),
+    ("BE.NMBS.008833001", "Hub",      "Flemish Brabant",  "Flanders"),
+    ("BE.NMBS.008891009", "Hub",      "West Flanders",    "Flanders"),
+    ("BE.NMBS.008863008", "Hub",      "Namur",            "Wallonia"),
+    ("BE.NMBS.008872009", "Hub",      "Hainaut",          "Wallonia"),
+    ("BE.NMBS.008831005", "Regional", "Limburg",          "Flanders"),
+    ("BE.NMBS.008831765", "Regional", "Limburg",          "Flanders"),
+    ("BE.NMBS.008831112", "Regional", "Limburg",          "Flanders"),
+]
+tracked_df = spark.createDataFrame(tracked, "station_id string, station_role string, province string, region string")
+
+dim_station = (
+    spark.table("lh_silver.stations")
+    .select("station_id", "station_name", "station_name_local", "latitude", "longitude")
+    .join(tracked_df, "station_id", "left")
+    .withColumn("is_tracked", F.col("station_role").isNotNull())
+    .withColumn("station_role", F.coalesce("station_role", F.lit("Destination only")))
+)
+dim_station.write.mode("overwrite").format("delta").saveAsTable("dim_station")
+
+print("stations:", spark.table("dim_station").count(),
+      "| tracked:", spark.table("dim_station").filter("is_tracked").count())
+display(spark.table("dim_station").filter("is_tracked").orderBy("region", "station_name"))
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
+
+# CELL ********************
+
+train_types = [
+    # category, description,                          is_international, is_rail
+    ("IC",    "InterCity",                            False, True),
+    ("S",     "Suburban (S-train)",                   False, True),
+    ("L",     "Local",                                False, True),
+    ("P",     "Peak-hour",                            False, True),
+    ("EXTRA", "Extra train",                          False, True),
+    ("TR",    "Special domestic service",             False, True),
+    ("ICE",   "ICE high-speed (Germany)",             True,  True),
+    ("EUR",   "Eurostar",                             True,  True),
+    ("TGV",   "TGV high-speed (France)",              True,  True),
+    ("ES",    "European Sleeper (night)",             True,  True),
+    ("NJ",    "Nightjet (night)",                     True,  True),
+    ("EC",    "EuroCity",                             True,  True),
+    ("ECD",   "EuroCity Direct (Amsterdam)",          True,  True),
+    ("OTC",   "Other international (Paris)",          True,  True),
+    ("BUS",   "Replacement bus",                      False, False),
+]
+types_df = spark.createDataFrame(
+    train_types, "train_category string, description string, is_international boolean, is_rail boolean")
+
+observed = spark.table("lh_silver.departures").select("train_category").distinct()
+
+dim_train_type = (
+    observed.join(types_df, "train_category", "left")
+    .withColumn("description", F.coalesce("description", F.lit("Other")))
+    .withColumn("is_international", F.coalesce("is_international", F.lit(False)))
+    .withColumn("is_rail", F.coalesce("is_rail", F.lit(True)))
+)
+dim_train_type.write.mode("overwrite").option("overwriteSchema", "true").format("delta").saveAsTable("dim_train_type")
+
+display(spark.table("dim_train_type").orderBy("train_category"))
+print("unmapped categories:",
+      [r.train_category for r in spark.table("dim_train_type").filter("description = 'Other'").collect()])
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
+
+# CELL ********************
+
+(spark.table("lh_silver.departures")
+    .filter(F.col("train_category").isin("BUS", "OTC", "TR", "ECD"))
+    .groupBy("train_category", "train_line")
+    .agg(F.count("*").alias("departures"),
+         F.first("train_name").alias("example_train"),
+         F.first("station_id").alias("example_from"),
+         F.first("destination_name").alias("example_to"))
+    .orderBy("train_category")
+    .show(truncate=False))
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
