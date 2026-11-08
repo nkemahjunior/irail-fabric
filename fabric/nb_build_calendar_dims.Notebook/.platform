@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Notebook",
+    "displayName": "nb_build_calendar_dims"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "d42c0307-e9d4-9a56-42cb-2bb037dedf24"
+  }
+}
