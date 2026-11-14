@@ -25,7 +25,7 @@
 
 # PARAMETERS CELL ********************
 
-layer = "gold"
+layer = "silver"
 
 
 # METADATA ********************
@@ -53,6 +53,13 @@ def orphans(fact, dim, key):
     return spark.table(fact).join(spark.table(dim), key, "left_anti").count()
 
 
+def stale(table, column, minutes):
+    is_stale = spark.sql(
+        f"SELECT max({column}) < current_timestamp() - INTERVAL {minutes} MINUTES FROM {table}"
+    ).first()[0]
+    return int(is_stale is None or is_stale)
+
+
 CHECKS = {
     "silver": [
         ("departures: unique departure_id",  lambda: duplicates("lh_silver.departures", "departure_id")),
@@ -60,6 +67,7 @@ CHECKS = {
         ("departures: delay 0 to 12 hours",  lambda: spark.table("lh_silver.departures").filter("delay_seconds < 0 OR delay_seconds > 43200").count()),
         ("disruptions: unique disruption_id", lambda: duplicates("lh_silver.disruptions", "disruption_id")),
         ("stations: unique station_id",      lambda: duplicates("lh_silver.stations", "station_id")),
+        ("departures: newest data under 45 min old", lambda: stale("lh_silver.departures", "last_seen_at", 45)),
     ],
     "gold": [
         ("fact: unique departure_id",        lambda: duplicates("lh_gold.fact_departure", "departure_id")),
