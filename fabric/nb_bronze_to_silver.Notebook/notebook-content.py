@@ -8,8 +8,8 @@
 # META   },
 # META   "dependencies": {
 # META     "lakehouse": {
-# META       "default_lakehouse": "c979fb51-8514-4db5-92a9-b5c698e8dff3",
-# META       "default_lakehouse_name": "lh_silver",
+# META       "default_lakehouse": "e1acee2e-9565-4280-8560-604681fab4c1",
+# META       "default_lakehouse_name": "lh_gold",
 # META       "default_lakehouse_workspace_id": "3d9a52a4-37cb-4643-af42-3d3bee62d970",
 # META       "known_lakehouses": [
 # META         {
@@ -17,6 +17,9 @@
 # META         },
 # META         {
 # META           "id": "c979fb51-8514-4db5-92a9-b5c698e8dff3"
+# META         },
+# META         {
+# META           "id": "e1acee2e-9565-4280-8560-604681fab4c1"
 # META         }
 # META       ]
 # META     }
@@ -26,13 +29,15 @@
 # CELL ********************
 
 import json
-from pathlib import Path
 from pyspark.sql import functions as F, Window
 from pyspark.sql.types import StructType
 from delta.tables import DeltaTable
 
-bronze = notebookutils.lakehouse.getWithProperties("lh_bronze")
-BRONZE_RAW = bronze["properties"]["abfsPath"] + "/Files/raw"
+def files_path(lakehouse):
+    return notebookutils.lakehouse.getWithProperties(lakehouse)["properties"]["abfsPath"] + "/Files"
+
+BRONZE_RAW = files_path("lh_bronze") + "/raw"
+SILVER_FILES = files_path("lh_silver")
 
 # METADATA ********************
 
@@ -65,16 +70,17 @@ def merge_latest(batch, target, key):
 
 
 def schema_for(endpoint):
-    path = Path(f"/lakehouse/default/Files/_schemas/{endpoint}.json")
-    if path.exists():
-        return StructType.fromJson(json.loads(path.read_text()))
+    path = f"{SILVER_FILES}/_schemas/{endpoint}.json"
+    if notebookutils.fs.exists(path):
+        return StructType.fromJson(json.loads(notebookutils.fs.head(path, 1_000_000)))
     schema = spark.read.json(f"{BRONZE_RAW}/{endpoint}").schema
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(schema.json())
+    notebookutils.fs.put(path, schema.json(), True)
     return schema
 
 
-def run_incremental(endpoint, flatten, target, key):
+def run_incremental(endpoint, flatten, table, key):
+    target = f"lh_silver.{table}"
+
     def process(new_files_df, batch_id):
         merge_latest(keep_latest(flatten(new_files_df), key), target, key)
 
@@ -84,7 +90,7 @@ def run_incremental(endpoint, flatten, target, key):
                 .withColumn("source_file", F.col("_metadata.file_path"))
              .writeStream
                 .foreachBatch(process)
-                .option("checkpointLocation", f"Files/_checkpoints/{target}")
+                .option("checkpointLocation", f"{SILVER_FILES}/_checkpoints/{table}")
                 .trigger(availableNow=True)
                 .start())
     query.awaitTermination()
@@ -191,27 +197,8 @@ run_incremental("stations", flatten_stations, "stations", "station_id")
 # CELL ********************
 
 for table, key in [("departures", "departure_id"), ("disruptions", "disruption_id"), ("stations", "station_id")]:
-    t = spark.table(table)
+    t = spark.table(f"lh_silver.{table}")
     print(f"{table}: rows {t.count()} | unique {t.select(key).distinct().count()}")
-
-display(spark.table("disruptions")
-        .select("disruption_type", "affected_section", "effect", "cause", "first_seen_at", "last_seen_at")
-        .orderBy(F.desc("last_seen_at")).limit(10))
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
-(spark.table("disruptions")
-    .groupBy("disruption_type")
-    .agg(F.count("*").alias("disruptions"),
-         F.count("cause").alias("with_cause"))
-    .show())
 
 # METADATA ********************
 
