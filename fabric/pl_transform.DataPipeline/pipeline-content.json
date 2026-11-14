@@ -101,6 +101,38 @@
             ]
           }
         ]
+      },
+      {
+        "type": "WebActivity",
+        "typeProperties": {
+          "method": "POST",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "content": "pl_transform failed or stopped early (run @{pipeline().RunId}). Check the Monitor hub."
+          }
+        },
+        "externalReferences": {
+          "connection": "a792bd7a-85f0-4133-94d0-f0aff53193ae"
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "notify_failure",
+        "dependsOn": [
+          {
+            "activity": "dq_gold",
+            "dependencyConditions": [
+              "Failed",
+              "Skipped"
+            ]
+          }
+        ]
       }
     ],
     "concurrency": 1
