@@ -1,0 +1,38 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.15.0/schema.json",
+  "name": "c735b3f58c19d51055a5",
+  "position": {
+    "x": 1524.0905280804695,
+    "y": 0,
+    "z": 8000,
+    "height": 206.00167644593463,
+    "width": 231.75188600167644,
+    "tabOrder": 8000
+  },
+  "visual": {
+    "visualType": "cardVisual",
+    "query": {
+      "queryState": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fact_departure"
+                    }
+                  },
+                  "Property": "Punctuality (NMBS, <6 min)"
+                }
+              },
+              "queryRef": "fact_departure.Punctuality (NMBS, <6 min)",
+              "nativeQueryRef": "Punctuality (NMBS, <6 min)"
+            }
+          ]
+        }
+      }
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

@@ -1,0 +1,107 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.15.0/schema.json",
+  "name": "688a69441c60b120c724",
+  "position": {
+    "x": 262.48901903367494,
+    "y": 18.975109809663252,
+    "z": 0,
+    "height": 510.7467057101025,
+    "width": 1081.5812591508052,
+    "tabOrder": 0
+  },
+  "visual": {
+    "visualType": "clusteredBarChart",
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dim_train_type"
+                    }
+                  },
+                  "Property": "description"
+                }
+              },
+              "queryRef": "dim_train_type.description",
+              "nativeQueryRef": "description",
+              "active": true
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fact_departure"
+                    }
+                  },
+                  "Property": "Avg delay (min)"
+                }
+              },
+              "queryRef": "fact_departure.Avg delay (min)",
+              "nativeQueryRef": "Avg delay (min)"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "fact_departure"
+                  }
+                },
+                "Property": "Avg delay (min)"
+              }
+            },
+            "direction": "Descending"
+          }
+        ],
+        "isDefaultSort": true
+      }
+    },
+    "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "3a45104845d00b787bb0",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dim_train_type"
+              }
+            },
+            "Property": "description"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "7ab1c5b8e3b0dd793442",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "fact_departure"
+              }
+            },
+            "Property": "Avg delay (min)"
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
+  }
+}

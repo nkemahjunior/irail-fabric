@@ -1,0 +1,153 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.15.0/schema.json",
+  "name": "030027b49183bc9a8968",
+  "position": {
+    "x": 197.65739385065885,
+    "y": 540.79062957540259,
+    "z": 1000,
+    "height": 539.20937042459741,
+    "width": 928.199121522694,
+    "tabOrder": 1000
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dim_station"
+                    }
+                  },
+                  "Property": "station_name"
+                }
+              },
+              "queryRef": "dim_station.station_name",
+              "nativeQueryRef": "station_name"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dim_station"
+                    }
+                  },
+                  "Property": "region"
+                }
+              },
+              "queryRef": "dim_station.region",
+              "nativeQueryRef": "region"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dim_station"
+                    }
+                  },
+                  "Property": "station_role"
+                }
+              },
+              "queryRef": "dim_station.station_role",
+              "nativeQueryRef": "station_role"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fact_departure"
+                    }
+                  },
+                  "Property": "Departures"
+                }
+              },
+              "queryRef": "fact_departure.Departures",
+              "nativeQueryRef": "Departures"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fact_departure"
+                    }
+                  },
+                  "Property": "Avg delay (min)"
+                }
+              },
+              "queryRef": "fact_departure.Avg delay (min)",
+              "nativeQueryRef": "Avg delay (min)"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fact_departure"
+                    }
+                  },
+                  "Property": "On-time %"
+                }
+              },
+              "queryRef": "fact_departure.On-time %",
+              "nativeQueryRef": "On-time %"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fact_departure"
+                    }
+                  },
+                  "Property": "Cancelled %"
+                }
+              },
+              "queryRef": "fact_departure.Cancelled %",
+              "nativeQueryRef": "Cancelled %"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fact_departure"
+                    }
+                  },
+                  "Property": "Platform changes"
+                }
+              },
+              "queryRef": "fact_departure.Platform changes",
+              "nativeQueryRef": "Platform changes"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "fact_departure"
+                  }
+                },
+                "Property": "Cancelled %"
+              }
+            },
+            "direction": "Ascending"
+          }
+        ]
+      }
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

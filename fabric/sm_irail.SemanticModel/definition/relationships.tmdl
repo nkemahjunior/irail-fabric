@@ -1,0 +1,16 @@
+relationship 67aa9ad4-481a-2bdc-3ba8-c468ea928d08
+	fromColumn: fact_departure.date_key
+	toColumn: dim_date.date_key
+
+relationship 4929ddfc-6ce1-1b2f-4928-c06222c244ab
+	fromColumn: fact_departure.time_key
+	toColumn: dim_time.time_key
+
+relationship 0db5644f-cdde-96d3-fb41-b68432e97099
+	fromColumn: fact_departure.station_id
+	toColumn: dim_station.station_id
+
+relationship 2aa6ad55-d8ca-5134-c735-079e9d14a3ba
+	fromColumn: fact_departure.train_category
+	toColumn: dim_train_type.train_category
+

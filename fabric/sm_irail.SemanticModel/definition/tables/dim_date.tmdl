@@ -1,0 +1,135 @@
+table dim_date
+	lineageTag: 0dcacef4-d83e-4a83-86fc-886363dfd1bf
+	sourceLineageTag: [dbo].[dim_date]
+	dataCategory: Time
+
+	column date_key
+		dataType: int64
+		formatString: 0
+		lineageTag: dd300e11-9035-4866-933c-588a33d4848a
+		sourceLineageTag: date_key
+		summarizeBy: none
+		sourceColumn: date_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column date
+		dataType: dateTime
+		isKey
+		formatString: General Date
+		lineageTag: e90adc1f-219f-4627-a858-b0cbabdd1d7b
+		sourceLineageTag: date
+		summarizeBy: none
+		sourceColumn: date
+
+		annotation SummarizationSetBy = Automatic
+
+	column year
+		dataType: int64
+		formatString: 0
+		lineageTag: fe6c5063-d77d-4d77-802f-97feed72f8f4
+		sourceLineageTag: year
+		summarizeBy: none
+		sourceColumn: year
+
+		annotation SummarizationSetBy = Automatic
+
+	column quarter
+		dataType: int64
+		formatString: 0
+		lineageTag: bbd8f6cf-c7d5-49e2-b4b7-32ecc9d757c5
+		sourceLineageTag: quarter
+		summarizeBy: none
+		sourceColumn: quarter
+
+		annotation SummarizationSetBy = Automatic
+
+	column month
+		dataType: int64
+		formatString: 0
+		lineageTag: 1503aae7-0713-4b3d-a77a-b3974259d755
+		sourceLineageTag: month
+		summarizeBy: none
+		sourceColumn: month
+
+		annotation SummarizationSetBy = Automatic
+
+	column month_name
+		dataType: string
+		lineageTag: 5182edda-3783-4088-8105-2bffc7c83967
+		sourceLineageTag: month_name
+		summarizeBy: none
+		sourceColumn: month_name
+		sortByColumn: month
+
+		changedProperty = SortByColumn
+
+		annotation SummarizationSetBy = Automatic
+
+	column day_of_month
+		dataType: int64
+		formatString: 0
+		lineageTag: 9e88be83-9dcf-4489-acb4-ac125c829940
+		sourceLineageTag: day_of_month
+		summarizeBy: none
+		sourceColumn: day_of_month
+
+		annotation SummarizationSetBy = Automatic
+
+	column day_of_week
+		dataType: int64
+		formatString: 0
+		lineageTag: ca126bfc-baff-46ea-89b0-95f9ff8b95a8
+		sourceLineageTag: day_of_week
+		summarizeBy: none
+		sourceColumn: day_of_week
+
+		annotation SummarizationSetBy = Automatic
+
+	column day_name
+		dataType: string
+		lineageTag: 5855228f-a7c3-45bb-ab38-4c9525d3ae5a
+		sourceLineageTag: day_name
+		summarizeBy: none
+		sourceColumn: day_name
+		sortByColumn: day_of_week
+
+		changedProperty = SortByColumn
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_weekend
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: ac2d94fc-37aa-4fc8-81b7-09da9baaacf0
+		sourceLineageTag: is_weekend
+		summarizeBy: none
+		sourceColumn: is_weekend
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_public_holiday
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: b94393b6-ed0d-426e-91af-3d5b8960f761
+		sourceLineageTag: is_public_holiday
+		summarizeBy: none
+		sourceColumn: is_public_holiday
+
+		annotation SummarizationSetBy = Automatic
+
+	column holiday_name
+		dataType: string
+		lineageTag: 3366161a-82f4-4b9b-b54c-aa9729c1c4a7
+		sourceLineageTag: holiday_name
+		summarizeBy: none
+		sourceColumn: holiday_name
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_date = entity
+		mode: directLake
+		source
+			entityName: dim_date
+			expressionSource: 'DirectLake - lh_gold'
+

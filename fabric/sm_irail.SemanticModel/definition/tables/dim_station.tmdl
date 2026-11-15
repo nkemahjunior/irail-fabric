@@ -1,0 +1,96 @@
+table dim_station
+	lineageTag: 38d7554e-9c24-40cc-95ba-15c4ddc49a51
+	sourceLineageTag: [dbo].[dim_station]
+
+	column station_id
+		dataType: string
+		lineageTag: e8833d0f-1841-4d47-a067-e966711cd29c
+		sourceLineageTag: station_id
+		summarizeBy: none
+		sourceColumn: station_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column station_name
+		dataType: string
+		lineageTag: e62ca358-2846-4c40-ae38-f707d2f7a0b5
+		sourceLineageTag: station_name
+		summarizeBy: none
+		sourceColumn: station_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column station_name_local
+		dataType: string
+		lineageTag: b05dd743-a773-4a71-8eea-85c85cad7d01
+		sourceLineageTag: station_name_local
+		summarizeBy: none
+		sourceColumn: station_name_local
+
+		annotation SummarizationSetBy = Automatic
+
+	column latitude
+		dataType: double
+		lineageTag: 0be9e65e-ca4c-4775-bbcc-36ef6a0b7518
+		sourceLineageTag: latitude
+		summarizeBy: none
+		sourceColumn: latitude
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column longitude
+		dataType: double
+		lineageTag: 29e077db-7176-4532-a477-d2f2212b7833
+		sourceLineageTag: longitude
+		summarizeBy: none
+		sourceColumn: longitude
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column station_role
+		dataType: string
+		lineageTag: 626084b1-71bd-4403-b452-594a2dc33535
+		sourceLineageTag: station_role
+		summarizeBy: none
+		sourceColumn: station_role
+
+		annotation SummarizationSetBy = Automatic
+
+	column province
+		dataType: string
+		lineageTag: b52d53ae-5fd7-4fcd-b456-da64552e3805
+		sourceLineageTag: province
+		summarizeBy: none
+		sourceColumn: province
+
+		annotation SummarizationSetBy = Automatic
+
+	column region
+		dataType: string
+		lineageTag: d2e4250a-a8e9-4431-a0bb-730575c1680f
+		sourceLineageTag: region
+		summarizeBy: none
+		sourceColumn: region
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_tracked
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: b8174d62-37cb-464b-8531-fc44e6bc69dc
+		sourceLineageTag: is_tracked
+		summarizeBy: none
+		sourceColumn: is_tracked
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_station = entity
+		mode: directLake
+		source
+			entityName: dim_station
+			expressionSource: 'DirectLake - lh_gold'
+

@@ -1,0 +1,38 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.15.0/schema.json",
+  "name": "aa499a0260cacd61eb0b",
+  "position": {
+    "x": 9.6563285834031856,
+    "y": 0,
+    "z": 0,
+    "height": 206.00167644593463,
+    "width": 239.79882648784576,
+    "tabOrder": 0
+  },
+  "visual": {
+    "visualType": "cardVisual",
+    "query": {
+      "queryState": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fact_departure"
+                    }
+                  },
+                  "Property": "Departures"
+                }
+              },
+              "queryRef": "fact_departure.Departures",
+              "nativeQueryRef": "Departures"
+            }
+          ]
+        }
+      }
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

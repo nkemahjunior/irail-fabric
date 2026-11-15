@@ -1,0 +1,38 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.15.0/schema.json",
+  "name": "2fcc79d1953d75031d99",
+  "position": {
+    "x": 621.22380553227163,
+    "y": 0,
+    "z": 2000,
+    "height": 206,
+    "width": 240,
+    "tabOrder": 2000
+  },
+  "visual": {
+    "visualType": "cardVisual",
+    "query": {
+      "queryState": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fact_departure"
+                    }
+                  },
+                  "Property": "Median delay (min)"
+                }
+              },
+              "queryRef": "fact_departure.Median delay (min)",
+              "nativeQueryRef": "Median delay (min)"
+            }
+          ]
+        }
+      }
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

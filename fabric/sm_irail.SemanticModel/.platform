@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "SemanticModel",
+    "displayName": "sm_irail"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "fd36b5e0-827b-9755-4e44-b46b26e0e34f"
+  }
+}

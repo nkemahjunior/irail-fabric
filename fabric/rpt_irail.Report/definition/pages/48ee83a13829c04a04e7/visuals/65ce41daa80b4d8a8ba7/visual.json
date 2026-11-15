@@ -1,0 +1,241 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.15.0/schema.json",
+  "name": "65ce41daa80b4d8a8ba7",
+  "position": {
+    "x": 262.48901903367494,
+    "y": 608.78477306002924,
+    "z": 1,
+    "height": 458.56515373352852,
+    "width": 1081.5812591508052,
+    "tabOrder": 1
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dim_train_type"
+                    }
+                  },
+                  "Property": "description"
+                }
+              },
+              "queryRef": "dim_train_type.description",
+              "nativeQueryRef": "description"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dim_train_type"
+                    }
+                  },
+                  "Property": "is_international"
+                }
+              },
+              "queryRef": "dim_train_type.is_international",
+              "nativeQueryRef": "is_international"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fact_departure"
+                    }
+                  },
+                  "Property": "Departures"
+                }
+              },
+              "queryRef": "fact_departure.Departures",
+              "nativeQueryRef": "Departures"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fact_departure"
+                    }
+                  },
+                  "Property": "Avg delay (min)"
+                }
+              },
+              "queryRef": "fact_departure.Avg delay (min)",
+              "nativeQueryRef": "Avg delay (min)"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fact_departure"
+                    }
+                  },
+                  "Property": "Median delay (min)"
+                }
+              },
+              "queryRef": "fact_departure.Median delay (min)",
+              "nativeQueryRef": "Median delay (min)"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fact_departure"
+                    }
+                  },
+                  "Property": "On-time %"
+                }
+              },
+              "queryRef": "fact_departure.On-time %",
+              "nativeQueryRef": "On-time %"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fact_departure"
+                    }
+                  },
+                  "Property": "Cancelled %"
+                }
+              },
+              "queryRef": "fact_departure.Cancelled %",
+              "nativeQueryRef": "Cancelled %"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "dim_train_type"
+                  }
+                },
+                "Property": "description"
+              }
+            },
+            "direction": "Descending"
+          }
+        ]
+      }
+    },
+    "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "846145e2b07048a199cd",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "fact_departure"
+              }
+            },
+            "Property": "Cancelled %"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "0ffbed4682375a7d5bc5",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "fact_departure"
+              }
+            },
+            "Property": "On-time %"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "2c6509820cb084e979cd",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "fact_departure"
+              }
+            },
+            "Property": "Median delay (min)"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "747b635785863c6837d3",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "fact_departure"
+              }
+            },
+            "Property": "Avg delay (min)"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "27b1a8697467e0a5d00a",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "fact_departure"
+              }
+            },
+            "Property": "Departures"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "d4ba1a60017825030020",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dim_train_type"
+              }
+            },
+            "Property": "is_international"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "c137d9277129d7d7c5a3",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dim_train_type"
+              }
+            },
+            "Property": "description"
+          }
+        },
+        "type": "Categorical"
+      }
+    ]
+  }
+}

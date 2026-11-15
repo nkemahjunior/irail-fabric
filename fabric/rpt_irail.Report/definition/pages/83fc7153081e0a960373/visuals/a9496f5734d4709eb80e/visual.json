@@ -1,0 +1,107 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.15.0/schema.json",
+  "name": "a9496f5734d4709eb80e",
+  "position": {
+    "x": 264.07027818448023,
+    "y": 452.24011713030745,
+    "z": 1,
+    "height": 441.17130307467056,
+    "width": 928.199121522694,
+    "tabOrder": 1
+  },
+  "visual": {
+    "visualType": "clusteredColumnChart",
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dim_time"
+                    }
+                  },
+                  "Property": "day_part"
+                }
+              },
+              "queryRef": "dim_time.day_part",
+              "nativeQueryRef": "day_part",
+              "active": true
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fact_departure"
+                    }
+                  },
+                  "Property": "On-time %"
+                }
+              },
+              "queryRef": "fact_departure.On-time %",
+              "nativeQueryRef": "On-time %"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "fact_departure"
+                  }
+                },
+                "Property": "On-time %"
+              }
+            },
+            "direction": "Descending"
+          }
+        ],
+        "isDefaultSort": true
+      }
+    },
+    "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "a6df4603480e30be5c80",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dim_time"
+              }
+            },
+            "Property": "day_part"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "83c4ce20d456e8675637",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "fact_departure"
+              }
+            },
+            "Property": "On-time %"
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
+  }
+}

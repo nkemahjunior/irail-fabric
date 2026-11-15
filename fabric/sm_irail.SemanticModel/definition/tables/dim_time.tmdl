@@ -1,0 +1,78 @@
+table dim_time
+	lineageTag: 12121a7c-efcd-4efe-9afb-5af3df8f3388
+	sourceLineageTag: [dbo].[dim_time]
+
+	column time_key
+		dataType: int64
+		formatString: 0
+		lineageTag: 2749dc0d-b26d-4cd3-859f-b5fecd33e0d5
+		sourceLineageTag: time_key
+		summarizeBy: none
+		sourceColumn: time_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column hour
+		dataType: int64
+		formatString: 0
+		lineageTag: 0e3c81d7-4923-4e10-a137-d1f76e5e5aac
+		sourceLineageTag: hour
+		summarizeBy: none
+		sourceColumn: hour
+
+		annotation SummarizationSetBy = Automatic
+
+	column minute
+		dataType: int64
+		formatString: 0
+		lineageTag: f62bbacc-9d6d-4456-bcae-47eee892b0bc
+		sourceLineageTag: minute
+		summarizeBy: none
+		sourceColumn: minute
+
+		annotation SummarizationSetBy = Automatic
+
+	column time_label
+		dataType: string
+		lineageTag: 60258403-9d73-42df-9d40-036c9d863f74
+		sourceLineageTag: time_label
+		summarizeBy: none
+		sourceColumn: time_label
+
+		annotation SummarizationSetBy = Automatic
+
+	column minute_of_day
+		dataType: int64
+		formatString: 0
+		lineageTag: eb7cc087-25fc-4538-901c-0f650de15ede
+		sourceLineageTag: minute_of_day
+		summarizeBy: none
+		sourceColumn: minute_of_day
+
+		annotation SummarizationSetBy = Automatic
+
+	column day_part
+		dataType: string
+		lineageTag: 246dbb95-1a95-49af-9455-f38e0ee85746
+		sourceLineageTag: day_part
+		summarizeBy: none
+		sourceColumn: day_part
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_peak
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: a70857be-db82-41a9-b9c4-95753fc4cec5
+		sourceLineageTag: is_peak
+		summarizeBy: none
+		sourceColumn: is_peak
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_time = entity
+		mode: directLake
+		source
+			entityName: dim_time
+			expressionSource: 'DirectLake - lh_gold'
+

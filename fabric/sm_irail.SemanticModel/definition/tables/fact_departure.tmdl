@@ -1,0 +1,339 @@
+table fact_departure
+	lineageTag: e7df12ec-1c87-4dd9-ac52-245164a82c03
+	sourceLineageTag: [dbo].[fact_departure]
+
+	measure Departures = COUNTROWS(fact_departure)
+		formatString: 0
+		displayFolder: Measures
+		lineageTag: e0698432-d97f-4234-a499-05d3c95199d2
+
+		changedProperty = Name
+
+		changedProperty = DisplayFolder
+
+	measure 'Avg delay (min)' =
+			
+			CALCULATE(AVERAGE(fact_departure[delay_minutes]), fact_departure[is_cancelled] = FALSE())
+		formatString: 0.0
+		displayFolder: Measures
+		lineageTag: cea8bcb2-54e5-4f13-8131-6af9ef17d2f4
+
+		changedProperty = Name
+
+		changedProperty = FormatString
+
+		changedProperty = DisplayFolder
+
+	measure 'Median delay (min)' =
+			
+			CALCULATE(MEDIAN(fact_departure[delay_minutes]), fact_departure[is_cancelled] = FALSE())
+		formatString: 0.0
+		displayFolder: Measures
+		lineageTag: 0d0179aa-c431-4d84-9f35-5f9c1fdc78d1
+
+		changedProperty = Name
+
+		changedProperty = FormatString
+
+		changedProperty = DisplayFolder
+
+	measure 'On-time %' =
+			
+			DIVIDE(CALCULATE([Departures], fact_departure[is_on_time] = TRUE()), [Departures])
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Measures
+		lineageTag: e734ca2a-c782-4b23-a45a-718250bae7e1
+
+		changedProperty = Name
+
+		changedProperty = FormatString
+
+		changedProperty = DisplayFolder
+
+	measure 'Delayed 5+ min %' =
+			
+			DIVIDE(CALCULATE([Departures], fact_departure[delay_minutes] >= 5), [Departures])
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Measures
+		lineageTag: 03f2cc8c-3b9d-4b6e-b81c-a9bcb94c6c70
+
+		changedProperty = Name
+
+		changedProperty = FormatString
+
+		changedProperty = DisplayFolder
+
+	measure 'Cancelled %' =
+			
+			DIVIDE(CALCULATE([Departures], fact_departure[is_cancelled] = TRUE()), [Departures])
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Measures
+		lineageTag: 9a7bfeb7-b473-4a32-b23f-9aeb014a0a66
+
+		changedProperty = Name
+
+		changedProperty = FormatString
+
+		changedProperty = DisplayFolder
+
+	measure 'Platform changes' =
+			
+			CALCULATE([Departures], fact_departure[platform_changed] = TRUE())
+		formatString: 0
+		displayFolder: Measures
+		lineageTag: b638461e-5f32-4271-a19f-99e74f4d877a
+
+		changedProperty = Name
+
+		changedProperty = DisplayFolder
+
+	measure 'Punctuality (NMBS, <6 min)' =
+			
+			DIVIDE(
+			    CALCULATE([Departures], fact_departure[delay_minutes] < 6, fact_departure[is_cancelled] = FALSE()),
+			    [Departures]
+			)
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Measures
+		lineageTag: 305d96aa-64b7-4193-9c50-15f551367320
+
+		changedProperty = Name
+
+		changedProperty = FormatString
+
+		changedProperty = DisplayFolder
+
+	column departure_id
+		dataType: string
+		lineageTag: 8e5ea492-6a7b-4506-b3c7-a14eadd450fb
+		sourceLineageTag: departure_id
+		summarizeBy: none
+		sourceColumn: departure_id
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column date_key
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 565768bf-dd01-47f3-b283-16dc680c3ac9
+		sourceLineageTag: date_key
+		summarizeBy: none
+		sourceColumn: date_key
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column time_key
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 5002a674-d490-4925-b3e4-a6d0adb0afd0
+		sourceLineageTag: time_key
+		summarizeBy: none
+		sourceColumn: time_key
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column station_id
+		dataType: string
+		isHidden
+		lineageTag: 8ae1a2e5-ac38-443d-ad4d-2df8fe8f59c1
+		sourceLineageTag: station_id
+		summarizeBy: none
+		sourceColumn: station_id
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column destination_station_id
+		dataType: string
+		lineageTag: 422f8580-e482-45bf-beb7-0dd799aad4ac
+		sourceLineageTag: destination_station_id
+		summarizeBy: none
+		sourceColumn: destination_station_id
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column train_category
+		dataType: string
+		isHidden
+		lineageTag: e076e474-f891-4102-92a8-22018f479f5a
+		sourceLineageTag: train_category
+		summarizeBy: none
+		sourceColumn: train_category
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column train_line
+		dataType: string
+		lineageTag: e2d9157a-7715-4bdf-bf9b-7e175656f4cc
+		sourceLineageTag: train_line
+		summarizeBy: none
+		sourceColumn: train_line
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column train_name
+		dataType: string
+		lineageTag: 5bb5d3e1-98f1-472b-a0a5-cd7cb8c357e3
+		sourceLineageTag: train_name
+		summarizeBy: none
+		sourceColumn: train_name
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column scheduled_departure_local
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: e5bc9fb4-a609-4d3f-b6a9-4429c9b9e445
+		sourceLineageTag: scheduled_departure_local
+		summarizeBy: none
+		sourceColumn: scheduled_departure_local
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column expected_departure_local
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 0ea0a7ce-72d4-49ef-b35f-009a3f7beeea
+		sourceLineageTag: expected_departure_local
+		summarizeBy: none
+		sourceColumn: expected_departure_local
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column delay_seconds
+		dataType: int64
+		formatString: 0
+		lineageTag: 1ed65b42-1723-465b-8f52-6938797abdb5
+		sourceLineageTag: delay_seconds
+		summarizeBy: sum
+		sourceColumn: delay_seconds
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column delay_minutes
+		dataType: double
+		lineageTag: 4ce13d78-29a0-4dca-a647-d8317c56b897
+		sourceLineageTag: delay_minutes
+		summarizeBy: sum
+		sourceColumn: delay_minutes
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column is_on_time
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 4d7fc365-c581-4021-88cd-38824b0427d3
+		sourceLineageTag: is_on_time
+		summarizeBy: none
+		sourceColumn: is_on_time
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_cancelled
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 6a301b3d-c3d7-45a4-8625-4f2f3f547d29
+		sourceLineageTag: is_cancelled
+		summarizeBy: none
+		sourceColumn: is_cancelled
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column platform_changed
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 5dfaa7d5-3d49-4fe6-bc01-acbce03c7042
+		sourceLineageTag: platform_changed
+		summarizeBy: none
+		sourceColumn: platform_changed
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_extra
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 038426e4-1bc3-4215-9701-c23f43977557
+		sourceLineageTag: is_extra
+		summarizeBy: none
+		sourceColumn: is_extra
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column occupancy
+		dataType: string
+		lineageTag: 91267f19-ed28-4c83-8756-0b067de58684
+		sourceLineageTag: occupancy
+		summarizeBy: none
+		sourceColumn: occupancy
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column first_seen_at
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 6df0a15e-507e-42bb-af13-fac9af459572
+		sourceLineageTag: first_seen_at
+		summarizeBy: none
+		sourceColumn: first_seen_at
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column last_seen_at
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 6ba1fd68-1ab1-4798-8e29-7c5cd536867a
+		sourceLineageTag: last_seen_at
+		summarizeBy: none
+		sourceColumn: last_seen_at
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition fact_departure = entity
+		mode: directLake
+		source
+			entityName: fact_departure
+			expressionSource: 'DirectLake - lh_gold'
+
+	changedProperty = IsHidden
+

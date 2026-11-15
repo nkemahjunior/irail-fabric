@@ -1,0 +1,48 @@
+table dim_train_type
+	lineageTag: f7580c2d-7af9-44a4-a137-0abe1e4a2516
+	sourceLineageTag: [dbo].[dim_train_type]
+
+	column train_category
+		dataType: string
+		lineageTag: ae198fca-2757-413d-9053-f8903de4553a
+		sourceLineageTag: train_category
+		summarizeBy: none
+		sourceColumn: train_category
+
+		annotation SummarizationSetBy = Automatic
+
+	column description
+		dataType: string
+		lineageTag: 2a6863ce-7701-4c67-8dca-a8b498de42a3
+		sourceLineageTag: description
+		summarizeBy: none
+		sourceColumn: description
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_international
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 3cf51159-e588-4294-82df-859a54ce6748
+		sourceLineageTag: is_international
+		summarizeBy: none
+		sourceColumn: is_international
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_rail
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: bd600f1c-f66d-44b2-be0a-c1676a00a284
+		sourceLineageTag: is_rail
+		summarizeBy: none
+		sourceColumn: is_rail
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_train_type = entity
+		mode: directLake
+		source
+			entityName: dim_train_type
+			expressionSource: 'DirectLake - lh_gold'
+
