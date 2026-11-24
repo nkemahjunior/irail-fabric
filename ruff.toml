@@ -1,0 +1,15 @@
+# Ruff linter settings for this repo
+line-length = 120
+target-version = "py311"
+
+# Names that Fabric notebooks provide automatically, so Ruff should not flag them as undefined
+builtins = ["spark", "notebookutils", "mssparkutils", "display"]
+
+# Contains a %pip magic line (not valid Python). Runs manually, not in a pipeline.
+extend-exclude = ["fabric/nb_build_calendar_dims.Notebook"]
+
+[lint]
+# E/W = style errors and warnings, F = real bugs (undefined names, unused imports), B = common bug patterns
+select = ["E", "W", "F", "B"]
+# Notebooks import inside cells, not only at the top of the file
+ignore = ["E402"]

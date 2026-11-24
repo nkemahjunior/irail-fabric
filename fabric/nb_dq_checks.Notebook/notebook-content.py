@@ -38,7 +38,14 @@ layer = "silver"
 # CELL ********************
 
 from datetime import datetime, timezone
+
 from pyspark.sql import functions as F
+
+# Table names used by the checks
+DEPARTURES = "lh_silver.departures"
+DISRUPTIONS = "lh_silver.disruptions"
+STATIONS = "lh_silver.stations"
+FACT = "lh_gold.fact_departure"
 
 
 def duplicates(table, key):
@@ -53,6 +60,14 @@ def orphans(fact, dim, key):
     return spark.table(fact).join(spark.table(dim), key, "left_anti").count()
 
 
+def rows_where(table, condition):
+    return spark.table(table).filter(condition).count()
+
+
+def count_diff(table_a, table_b):
+    return abs(spark.table(table_a).count() - spark.table(table_b).count())
+
+
 def stale(table, column, minutes):
     is_stale = spark.sql(
         f"SELECT max({column}) < current_timestamp() - INTERVAL {minutes} MINUTES FROM {table}"
@@ -62,20 +77,26 @@ def stale(table, column, minutes):
 
 CHECKS = {
     "silver": [
-        ("departures: unique departure_id",  lambda: duplicates("lh_silver.departures", "departure_id")),
-        ("departures: keys not null",        lambda: nulls("lh_silver.departures", ["departure_id", "station_id", "scheduled_departure_utc"])),
-        ("departures: delay 0 to 12 hours",  lambda: spark.table("lh_silver.departures").filter("delay_seconds < 0 OR delay_seconds > 43200").count()),
-        ("disruptions: unique disruption_id", lambda: duplicates("lh_silver.disruptions", "disruption_id")),
-        ("stations: unique station_id",      lambda: duplicates("lh_silver.stations", "station_id")),
-        ("departures: newest data under 45 min old", lambda: stale("lh_silver.departures", "last_seen_at", 45)),
+        ("departures: unique departure_id", lambda: duplicates(DEPARTURES, "departure_id")),
+        (
+            "departures: keys not null",
+            lambda: nulls(DEPARTURES, ["departure_id", "station_id", "scheduled_departure_utc"]),
+        ),
+        (
+            "departures: delay 0 to 12 hours",
+            lambda: rows_where(DEPARTURES, "delay_seconds < 0 OR delay_seconds > 43200"),
+        ),
+        ("disruptions: unique disruption_id", lambda: duplicates(DISRUPTIONS, "disruption_id")),
+        ("stations: unique station_id", lambda: duplicates(STATIONS, "station_id")),
+        ("departures: newest data under 45 min old", lambda: stale(DEPARTURES, "last_seen_at", 45)),
     ],
     "gold": [
-        ("fact: unique departure_id",        lambda: duplicates("lh_gold.fact_departure", "departure_id")),
-        ("fact: no orphan date_key",         lambda: orphans("lh_gold.fact_departure", "lh_gold.dim_date", "date_key")),
-        ("fact: no orphan time_key",         lambda: orphans("lh_gold.fact_departure", "lh_gold.dim_time", "time_key")),
-        ("fact: no orphan station_id",       lambda: orphans("lh_gold.fact_departure", "lh_gold.dim_station", "station_id")),
-        ("fact: no orphan train_category",   lambda: orphans("lh_gold.fact_departure", "lh_gold.dim_train_type", "train_category")),
-        ("fact: row count matches silver",   lambda: abs(spark.table("lh_gold.fact_departure").count() - spark.table("lh_silver.departures").count())),
+        ("fact: unique departure_id", lambda: duplicates(FACT, "departure_id")),
+        ("fact: no orphan date_key", lambda: orphans(FACT, "lh_gold.dim_date", "date_key")),
+        ("fact: no orphan time_key", lambda: orphans(FACT, "lh_gold.dim_time", "time_key")),
+        ("fact: no orphan station_id", lambda: orphans(FACT, "lh_gold.dim_station", "station_id")),
+        ("fact: no orphan train_category", lambda: orphans(FACT, "lh_gold.dim_train_type", "train_category")),
+        ("fact: row count matches silver", lambda: count_diff(FACT, DEPARTURES)),
     ],
 }
 
@@ -91,14 +112,16 @@ CHECKS = {
 run_at = datetime.now(timezone.utc)
 results = [(run_at, layer, name, int(check())) for name, check in CHECKS[layer]]
 
-results_df = (spark.createDataFrame(results, "run_at timestamp, layer string, check_name string, failing_rows long")
-              .withColumn("passed", F.col("failing_rows") == 0))
+results_df = spark.createDataFrame(
+    results, "run_at timestamp, layer string, check_name string, failing_rows long"
+).withColumn("passed", F.col("failing_rows") == 0)
 results_df.write.mode("append").format("delta").saveAsTable("lh_gold.dq_results")
 display(results_df)
 
 failed = [(name, n) for _, _, name, n in results if n > 0]
 if failed:
-    raise Exception(f"{len(failed)} data quality check(s) failed: " + "; ".join(f"{name} ({n} rows)" for name, n in failed))
+    details = "; ".join(f"{name} ({n} rows)" for name, n in failed)
+    raise Exception(f"{len(failed)} data quality check(s) failed: {details}")
 
 # METADATA ********************
 

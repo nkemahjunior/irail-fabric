@@ -1,0 +1,17 @@
+name: lint
+
+on:
+  pull_request:          # run on every pull request
+  push:
+    branches: [main]     # and on every change that lands on main
+
+jobs:
+  ruff:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install ruff
+      - run: ruff check . --output-format=github   # lint everything; problems show inline in the PR
