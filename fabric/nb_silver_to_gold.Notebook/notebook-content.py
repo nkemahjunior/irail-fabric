@@ -23,6 +23,12 @@
 # META   }
 # META }
 
+# MARKDOWN ********************
+
+# # Silver → gold (star schema)
+# Builds `dim_station` and `dim_train_type` (full refresh) and `fact_departure` (incremental MERGE using a `last_seen_at` watermark) in `lh_gold`.
+# **Runs:** `pl_transform`, hourly · **Safe to re-run:** yes
+
 # CELL ********************
 
 from pyspark.sql import functions as F

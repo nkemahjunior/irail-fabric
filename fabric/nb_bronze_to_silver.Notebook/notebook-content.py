@@ -26,6 +26,12 @@
 # META   }
 # META }
 
+# MARKDOWN ********************
+
+# # Bronze → silver
+# Reads new raw JSON files incrementally (Structured Streaming, availableNow, checkpoints), flattens them, keeps the latest version per key, and merges into `lh_silver.departures`, `disruptions` and `stations`.
+# **Runs:** `pl_transform`, hourly · **Safe to re-run:** yes (checkpoints + MERGE)
+
 # CELL ********************
 
 import json

@@ -21,6 +21,12 @@
 # META   }
 # META }
 
+# MARKDOWN ********************
+
+# # Ingest iRail API → bronze
+# Calls the iRail API for liveboards (13 stations), disturbances, and stations (once a day). Saves raw JSON to `lh_bronze/Files/raw/<endpoint>/date=YYYY-MM-DD/`.
+# **Config:** variable library `vl_irail` · **Runs:** `pl_ingest`, every 10 min · **Fails if:** any API call fails after retries
+
 # CELL ********************
 
 import json
