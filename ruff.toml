@@ -11,5 +11,6 @@ extend-exclude = ["fabric/nb_build_calendar_dims.Notebook"]
 [lint]
 # E/W = style errors and warnings, F = real bugs (undefined names, unused imports), B = common bug patterns
 select = ["E", "W", "F", "B"]
-# Notebooks import inside cells, not only at the top of the file
-ignore = ["E402"]
+# E402: notebooks import inside cells, not only at the top of the file
+# E501: markdown cells are stored as long comment lines; code length is handled by the formatter
+ignore = ["E402", "E501"]
