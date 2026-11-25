@@ -23,6 +23,12 @@
 # META   }
 # META }
 
+# MARKDOWN ********************
+
+# # Data quality checks
+# Runs the checks for one layer (parameter `layer` = `silver` or `gold`): duplicates, nulls, value ranges, freshness, orphan keys, row counts. Appends results to `lh_gold.dq_results` and fails the pipeline if any check fails.
+# **Runs:** `pl_transform`, after each layer
+
 # PARAMETERS CELL ********************
 
 layer = "silver"

@@ -20,6 +20,12 @@
 # META   }
 # META }
 
+# MARKDOWN ********************
+
+# # Calendar dimensions
+# Builds `dim_date` (2026–2027, with Belgian public holidays) and `dim_time` (1,440 minutes, with day parts and peak flags) in `lh_gold`.
+# **Runs:** manually, once a year before the date range runs out
+
 # CELL ********************
 
 %pip install holidays --quiet
